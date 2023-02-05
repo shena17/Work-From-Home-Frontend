@@ -6,7 +6,8 @@ import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
 import { Row, Col } from "react-bootstrap";
 import countries from "../json/countries.json";
-import { redirect } from "react-router-dom";
+import axios from "axios";
+import Alert from "react-bootstrap/Alert";
 
 export default function Register() {
   //Validation
@@ -74,6 +75,10 @@ export default function Register() {
     return newErrors;
   };
 
+  //Error state
+  const [show, setShow] = useState(false);
+  const [regError, setRegError] = useState();
+
   const handleSubmit = (event) => {
     event.preventDefault();
 
@@ -82,8 +87,28 @@ export default function Register() {
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
     } else {
-      console.log(form);
       setValidated(true);
+
+      //SEND DATA TO FORM
+      const { companyName, country, address, email, password } = form;
+
+      const newCompany = {
+        companyName,
+        country,
+        address,
+        email,
+        password,
+      };
+
+      axios
+        .post("https://work-from-home-backend.onrender.com", newCompany)
+        .then((res) => {
+          window.location.href = "/login";
+        })
+        .catch((res) => {
+          setShow(true);
+          setRegError(res.data);
+        });
     }
   };
 
@@ -101,6 +126,7 @@ export default function Register() {
             alt="Logo"
           />
         </a>
+
         <Form
           noValidate
           validated={validated}
@@ -108,6 +134,16 @@ export default function Register() {
           className="login-form"
         >
           <div className="login-lead">Register your Company</div>
+
+          {/* ERROR MSG */}
+          {show ? (
+            <Alert variant="danger" onClose={() => setShow(false)} dismissible>
+              <Alert.Heading>Registration Failed</Alert.Heading>
+              <p className="mt-4">{regError}</p>
+            </Alert>
+          ) : (
+            ""
+          )}
 
           <Form.Group className="form-group" controlId="validationCustom01">
             <Form.Label>Company name</Form.Label>
@@ -161,8 +197,6 @@ export default function Register() {
               <Form.Control.Feedback type="invalid">
                 {errors.country}
               </Form.Control.Feedback>
-
-              {/* <div className="red">{errors.country}</div> */}
             </Form.Group>
 
             <Form.Group
