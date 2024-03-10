@@ -1,2 +1,2 @@
 ## Demo
-https://eventerproject.netlify.app/
+https://workspaceproject.netlify.app/
